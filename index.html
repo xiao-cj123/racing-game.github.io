@@ -71,6 +71,17 @@
             transform: perspective(500px) rotateX(20deg);
         }
 
+        /* 修改后的小等边三角形障碍物样式 */
+        .triangle-obstacle {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid #000000;
+            position: absolute;
+            transform: perspective(500px) rotateX(20deg);
+        }
+
         #result {
             font-size: 24px;
             font-weight: bold;
@@ -134,7 +145,7 @@
             margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 30%;
+            width: 80%; /* 修改为和游戏提示玩法一样宽 */
             cursor: pointer;
         }
 
@@ -159,7 +170,9 @@
             <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在五条跑道上行驶。</p>
             <p>玩法说明：</p>
             <ul>
-                <li>通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
+                <li>请鑫哥、博哥评鉴的赛车小游戏</li>
+                <li>在手机浏览器中，通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
+                <li>在电脑网页中，使用左右方向键控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物，成功避开障碍物可获得积分。</li>
                 <li>距离障碍物越近时成功转向，获得的积分越高。</li>
                 <li>随着游戏时间的推移，障碍物的移动速度会越来越快。</li>
@@ -168,7 +181,8 @@
         </div>
     </div>
 
-    <h1>赛车游戏</h1>
+    <!-- 删除游戏游玩界面的赛车游戏这几个字 -->
+    <!-- <h1>赛车游戏</h1> -->
     <div id="game-container">
         <div id="side-blocks-left"></div>
         <div id="track">
@@ -181,7 +195,7 @@
         </div>
         <div id="side-blocks-right"></div>
     </div>
-    <p>通过左右滑动屏幕控制赛车移动</p>
+    <p>在手机浏览器中，通过左右滑动屏幕控制赛车移动；在电脑网页中，使用左右方向键控制赛车移动</p>
     <div id="result"></div>
     <div id="score">积分: 0</div>
 
@@ -282,56 +296,54 @@
             // 启动侧边方块移动
             startSideBlocks();
 
-            // 添加滑动屏幕事件监听器
-            document.addEventListener('touchstart', function (event) {
-                startX = event.touches[0].clientX;
-            });
+            // 判断是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-            document.addEventListener('touchend', function (event) {
-                if (isGameOver) return;
-                const endX = event.changedTouches[0].clientX;
-                if (endX > startX && currentLane < 4) {
-                    // 向右滑动
-                    moveCar(1);
-                } else if (endX < startX && currentLane > 0) {
-                    // 向左滑动
-                    moveCar(-1);
-                }
-            });
+            if (isMobile) {
+                // 移动设备添加滑动屏幕事件监听器
+                document.addEventListener('touchstart', function (event) {
+                    startX = event.touches[0].clientX;
+                });
+
+                document.addEventListener('touchend', function (event) {
+                    if (isGameOver) return;
+                    const endX = event.changedTouches[0].clientX;
+                    if (endX > startX && currentLane < 4) {
+                        // 向右滑动
+                        moveCar(1);
+                    } else if (endX < startX && currentLane > 0) {
+                        // 向左滑动
+                        moveCar(-1);
+                    }
+                });
+            } else {
+                // 电脑设备添加按键事件监听
+                document.addEventListener('keydown', function (event) {
+                    if (isGameOver) return;
+                    if (event.key === 'ArrowLeft') {
+                        moveCar(-1);
+                    } else if (event.key === 'ArrowRight') {
+                        moveCar(1);
+                    }
+                });
+            }
         }
 
         // 设置赛车初始位置
         playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
-
-        // 移除按键事件监听
-        // document.addEventListener('keydown', function (event) {
-        //     if (isGameOver) return;
-        //     if (event.key === 'ArrowLeft') {
-        //         moveCar(-1);
-        //     } else if (event.key === 'ArrowRight') {
-        //         moveCar(1);
-        //     }
-        // });
-
-        // 移除触摸控制按钮事件监听
-        // leftButton.addEventListener('touchstart', function () {
-        //     if (isGameOver) return;
-        //     moveCar(-1);
-        // });
-
-        // rightButton.addEventListener('touchstart', function () {
-        //     if (isGameOver) return;
-        //     moveCar(1);
-        // });
 
         // 移动赛车函数
         function moveCar(direction) {
             if ((direction === -1 && currentLane > 0) || (direction === 1 && currentLane < 4)) {
                 // 播放移动音效
                 moveSound.currentTime = 0;
-                moveSound.play();
+                try {
+                    moveSound.play();
+                } catch (error) {
+                    console.error('移动音效播放失败:', error);
+                }
                 // 检查是否成功转向避开障碍物
-                const obstacles = track.querySelectorAll('.obstacle');
+                const obstacles = track.querySelectorAll('.obstacle, .triangle-obstacle');
                 const playerRect = playerCar.getBoundingClientRect();
                 obstacles.forEach(obstacle => {
                     const obstacleRect = obstacle.getBoundingClientRect();
@@ -361,10 +373,18 @@
                 } while (usedLanes.includes(randomLane));
                 usedLanes.push(randomLane);
 
-                const obstacle = document.createElement('div');
-                obstacle.classList.add('obstacle');
+                // 随机决定是矩形还是三角形障碍物
+                const isTriangle = Math.random() < 0.3; // 30% 的概率是三角形障碍物
+                let obstacle;
+                if (isTriangle) {
+                    obstacle = document.createElement('div');
+                    obstacle.classList.add('triangle-obstacle');
+                } else {
+                    obstacle = document.createElement('div');
+                    obstacle.classList.add('obstacle');
+                }
                 obstacle.style.left = (randomLane * laneWidth + (laneWidth - 40) / 2) + 'px';
-                obstacle.style.top = '-80px';
+                obstacle.style.top = '-35px'; // 调整三角形初始位置
                 track.appendChild(obstacle);
 
                 const moveInterval = setInterval(function () {
@@ -385,7 +405,11 @@
                             clearInterval(moveInterval);
                             // 播放碰撞音效
                             collisionSound.currentTime = 0;
-                            collisionSound.play();
+                            try {
+                                collisionSound.play();
+                            } catch (error) {
+                                console.error('碰撞音效播放失败:', error);
+                            }
                             gameOver();
                         }
                     }
@@ -467,7 +491,7 @@
             result.textContent = '';
             playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             // 移除所有障碍物
-            const obstacles = track.querySelectorAll('.obstacle');
+            const obstacles = track.querySelectorAll('.obstacle, .triangle-obstacle');
             obstacles.forEach(obstacle => track.removeChild(obstacle));
             // 移除所有侧边方块
             const sideBlocks = document.querySelectorAll('.side-block');
