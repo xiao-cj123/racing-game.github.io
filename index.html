@@ -138,33 +138,14 @@
             cursor: pointer;
         }
 
-        #history-scores {
-            /* 游戏进行时隐藏排名信息 */
+        /* 隐藏触摸控制按钮 */
+        #touch-controls {
             display: none;
         }
 
-        /* 触摸控制按钮样式 */
-        #touch-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 0 20px;
-        }
-
-        .touch-button {
-            width: 100px;
-            height: 100px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
+        /* 游戏进行时隐藏历史积分排名 */
+        #history-scores {
+            display: none;
         }
     </style>
 </head>
@@ -178,7 +159,7 @@
             <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在五条跑道上行驶。</p>
             <p>玩法说明：</p>
             <ul>
-                <li>使用左右方向键、触摸屏幕控制按钮或者左右滑动屏幕控制赛车在不同跑道之间移动。</li>
+                <li>通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物，成功避开障碍物可获得积分。</li>
                 <li>距离障碍物越近时成功转向，获得的积分越高。</li>
                 <li>随着游戏时间的推移，障碍物的移动速度会越来越快。</li>
@@ -200,7 +181,7 @@
         </div>
         <div id="side-blocks-right"></div>
     </div>
-    <p>使用左右方向键、触摸屏幕控制按钮或者左右滑动屏幕控制赛车移动</p>
+    <p>通过左右滑动屏幕控制赛车移动</p>
     <div id="result"></div>
     <div id="score">积分: 0</div>
 
@@ -208,7 +189,7 @@
     <div id="level-modal">
         <div id="level-modal-content">
             <p id="level-text"></p>
-            <!-- 游戏结束后显示排名信息 -->
+            <!-- 游戏结束后显示历史积分排名 -->
             <ul id="score-list"></ul>
         </div>
     </div>
@@ -219,11 +200,11 @@
         <ul id="score-list"></ul>
     </div>
 
-    <!-- 触摸控制按钮 -->
-    <div id="touch-controls">
+    <!-- 移除触摸控制按钮 -->
+    <!-- <div id="touch-controls">
         <div id="left-button" class="touch-button">←</div>
         <div id="right-button" class="touch-button">→</div>
-    </div>
+    </div> -->
 
     <!-- 音效元素 -->
     <audio id="moveSound" src="sounds/move.mp3" preload="auto"></audio>
@@ -266,10 +247,6 @@
         // 历史积分列表
         const scoreList = document.getElementById('score-list');
         let historyScores = [];
-
-        // 获取触摸控制按钮
-        const leftButton = document.getElementById('left-button');
-        const rightButton = document.getElementById('right-button');
 
         let startX;
 
@@ -326,26 +303,26 @@
         // 设置赛车初始位置
         playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
 
-        // 监听按键事件
-        document.addEventListener('keydown', function (event) {
-            if (isGameOver) return;
-            if (event.key === 'ArrowLeft') {
-                moveCar(-1);
-            } else if (event.key === 'ArrowRight') {
-                moveCar(1);
-            }
-        });
+        // 移除按键事件监听
+        // document.addEventListener('keydown', function (event) {
+        //     if (isGameOver) return;
+        //     if (event.key === 'ArrowLeft') {
+        //         moveCar(-1);
+        //     } else if (event.key === 'ArrowRight') {
+        //         moveCar(1);
+        //     }
+        // });
 
-        // 监听触摸控制按钮事件
-        leftButton.addEventListener('touchstart', function () {
-            if (isGameOver) return;
-            moveCar(-1);
-        });
+        // 移除触摸控制按钮事件监听
+        // leftButton.addEventListener('touchstart', function () {
+        //     if (isGameOver) return;
+        //     moveCar(-1);
+        // });
 
-        rightButton.addEventListener('touchstart', function () {
-            if (isGameOver) return;
-            moveCar(1);
-        });
+        // rightButton.addEventListener('touchstart', function () {
+        //     if (isGameOver) return;
+        //     moveCar(1);
+        // });
 
         // 移动赛车函数
         function moveCar(direction) {
