@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>赛车游戏</title>
     <style>
         body {
@@ -11,42 +11,39 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            overflow: hidden;
         }
 
         #game-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            height: 100vh;
         }
 
         #side-blocks-left,
         #side-blocks-right {
-            width: 5%;
-            height: 100%;
+            width: 30px;
+            height: 600px;
             position: relative;
             overflow: hidden;
         }
 
         .side-block {
-            width: 100%;
-            height: 2%;
+            width: 30px;
+            height: 10px;
             background-color: #ccc;
             position: absolute;
         }
 
         #track {
-            width: 90%;
-            height: 100%;
+            width: 500px;
+            height: 600px;
             border: 1px solid #000;
             position: relative;
             overflow: hidden;
         }
 
         .lane {
-            width: 20%;
+            width: 100px;
             height: 100%;
             float: left;
             border-right: 1px dashed #ccc;
@@ -54,19 +51,19 @@
         }
 
         .car {
-            width: 8%;
-            height: 15%;
+            width: 40px;
+            height: 80px;
             background: linear-gradient(to bottom, #ff0000, #8b0000);
             border-radius: 15px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             position: absolute;
-            bottom: 5%;
+            bottom: 10px;
             transform: perspective(500px) rotateX(20deg);
         }
 
         .obstacle {
-            width: 8%;
-            height: 15%;
+            width: 40px;
+            height: 80px;
             background: linear-gradient(to bottom, #000000, #333333);
             border-radius: 15px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
@@ -75,14 +72,14 @@
         }
 
         #result {
-            font-size: 4vw;
+            font-size: 24px;
             font-weight: bold;
-            margin-top: 5%;
+            margin-top: 20px;
         }
 
         #score {
-            font-size: 3vw;
-            margin-top: 3%;
+            font-size: 20px;
+            margin-top: 10px;
         }
 
         /* 模态框样式 */
@@ -101,7 +98,7 @@
         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
-            padding: 5%;
+            padding: 20px;
             border: 1px solid #888;
             width: 80%;
         }
@@ -109,7 +106,7 @@
         .close {
             color: #aaa;
             float: right;
-            font-size: 6vw;
+            font-size: 28px;
             font-weight: bold;
         }
 
@@ -135,18 +132,17 @@
         #level-modal-content {
             background-color: #fefefe;
             margin: 15% auto;
-            padding: 5%;
+            padding: 20px;
             border: 1px solid #888;
-            width: 80%;
+            width: 30%;
             cursor: pointer;
         }
 
         #history-scores {
             position: absolute;
-            top: 5%;
-            right: 5%;
+            top: 20px;
+            right: 20px;
             text-align: left;
-            font-size: 3vw;
         }
     </style>
 </head>
@@ -160,7 +156,7 @@
             <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在五条跑道上行驶。</p>
             <p>玩法说明：</p>
             <ul>
-                <li>在手机上通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
+                <li>使用左右方向键控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物，成功避开障碍物可获得积分。</li>
                 <li>距离障碍物越近时成功转向，获得的积分越高。</li>
                 <li>随着游戏时间的推移，障碍物的移动速度会越来越快。</li>
@@ -182,7 +178,7 @@
         </div>
         <div id="side-blocks-right"></div>
     </div>
-    <p>在手机上通过左右滑动屏幕控制赛车移动</p>
+    <p>使用左右方向键控制赛车移动</p>
     <div id="result"></div>
     <div id="score">积分: 0</div>
 
@@ -200,16 +196,16 @@
     </div>
 
     <!-- 音效元素 -->
-    <audio id="moveSound" src="src sounds/move.mp3" preload="auto"></audio>
-    <audio id="collisionSound" src="src sounds/collision.mp3" preload="auto"></audio>
-    <audio id="backgroundMusic" src="src sounds/background.mp3" preload="auto" loop></audio>
+    <audio id="moveSound" src="sounds/move.mp3" preload="auto"></audio>
+    <audio id="collisionSound" src="sounds/collision.mp3" preload="auto"></audio>
+    <audio id="backgroundMusic" src="sounds/background.mp3" preload="auto" loop></audio>
 
     <script>
         const track = document.getElementById('track');
         const playerCar = document.getElementById('player-car');
         const result = document.getElementById('result');
         const scoreElement = document.getElementById('score');
-        const laneWidth = track.offsetWidth / 5;
+        const laneWidth = 100;
         let currentLane = 2; // 初始位于中间车道
         let isGameOver = false;
         let score = 0;
@@ -241,8 +237,6 @@
         const scoreList = document.getElementById('score-list');
         let historyScores = [];
 
-        let startX;
-
         // 打开模态框
         window.onload = function () {
             modal.style.display = "block";
@@ -271,7 +265,7 @@
         }
 
         // 设置赛车初始位置
-        playerCar.style.left = (currentLane * laneWidth + (laneWidth - playerCar.offsetWidth) / 2) + 'px';
+        playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
 
         // 监听按键事件
         document.addEventListener('keydown', function (event) {
@@ -295,60 +289,11 @@
             }
             if (event.key === 'ArrowLeft' && currentLane > 0) {
                 currentLane--;
-                playerCar.style.left = (currentLane * laneWidth + (laneWidth - playerCar.offsetWidth) / 2) + 'px';
+                playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             } else if (event.key === 'ArrowRight' && currentLane < 4) {
                 currentLane++;
-                playerCar.style.left = (currentLane * laneWidth + (laneWidth - playerCar.offsetWidth) / 2) + 'px';
+                playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             }
-        });
-
-        // 增加触摸事件处理
-        document.addEventListener('touchstart', function (event) {
-            startX = event.touches[0].clientX;
-        });
-
-        document.addEventListener('touchmove', function (event) {
-            if (isGameOver) return;
-            const moveX = event.touches[0].clientX;
-            const diffX = moveX - startX;
-            if (diffX > 50 && currentLane < 4) {
-                currentLane++;
-                playerCar.style.left = (currentLane * laneWidth + (laneWidth - playerCar.offsetWidth) / 2) + 'px';
-                // 播放移动音效
-                moveSound.currentTime = 0;
-                moveSound.play();
-                // 检查是否成功转向避开障碍物
-                const obstacles = track.querySelectorAll('.obstacle');
-                const playerRect = playerCar.getBoundingClientRect();
-                obstacles.forEach(obstacle => {
-                    const obstacleRect = obstacle.getBoundingClientRect();
-                    const distance = Math.abs(obstacleRect.top - playerRect.bottom);
-                    if (distance < 200) { // 只考虑距离较近的障碍物
-                        const turnScore = Math.min(100, Math.max(50, 100 - Math.floor(distance / 2)));
-                        score += turnScore;
-                        scoreElement.textContent = `积分: ${score}`;
-                    }
-                });
-            } else if (diffX < -50 && currentLane > 0) {
-                currentLane--;
-                playerCar.style.left = (currentLane * laneWidth + (laneWidth - playerCar.offsetWidth) / 2) + 'px';
-                // 播放移动音效
-                moveSound.currentTime = 0;
-                moveSound.play();
-                // 检查是否成功转向避开障碍物
-                const obstacles = track.querySelectorAll('.obstacle');
-                const playerRect = playerCar.getBoundingClientRect();
-                obstacles.forEach(obstacle => {
-                    const obstacleRect = obstacle.getBoundingClientRect();
-                    const distance = Math.abs(obstacleRect.top - playerRect.bottom);
-                    if (distance < 200) { // 只考虑距离较近的障碍物
-                        const turnScore = Math.min(100, Math.max(50, 100 - Math.floor(distance / 2)));
-                        score += turnScore;
-                        scoreElement.textContent = `积分: ${score}`;
-                    }
-                });
-            }
-            startX = moveX;
         });
 
         // 生成障碍物
@@ -367,8 +312,8 @@
 
                 const obstacle = document.createElement('div');
                 obstacle.classList.add('obstacle');
-                obstacle.style.left = (randomLane * laneWidth + (laneWidth - obstacle.offsetWidth) / 2) + 'px';
-                obstacle.style.top = '-15%';
+                obstacle.style.left = (randomLane * laneWidth + (laneWidth - 40) / 2) + 'px';
+                obstacle.style.top = '-80px';
                 track.appendChild(obstacle);
 
                 const moveInterval = setInterval(function () {
@@ -377,14 +322,14 @@
                         return;
                     }
                     const currentTop = parseInt(obstacle.style.top);
-                    const playerTop = parseInt(playerCar.style.top) || (100 - 5 - 15);
+                    const playerTop = parseInt(playerCar.style.top) || (600 - 10 - 80);
                     const distance = Math.abs(currentTop - playerTop);
 
-                    if (currentTop > 100) {
+                    if (currentTop > 600) {
                         clearInterval(moveInterval);
                         track.removeChild(obstacle);
                     } else {
-                        obstacle.style.top = (currentTop + speed) + '%';
+                        obstacle.style.top = (currentTop + speed) + 'px';
                         if (checkCollision(playerCar, obstacle)) {
                             clearInterval(moveInterval);
                             // 播放碰撞音效
@@ -443,3 +388,105 @@
                 level = "新手上路";
             } else if (score >= 5000 && score < 10000) {
                 level = "老司机";
+            } else {
+                level = "真的无聊";
+            }
+            levelText.textContent = `你的等级是: ${level}，点击重新开始`;
+            levelModal.style.display = "block";
+        }
+
+        // 更新历史积分列表
+        function updateScoreList() {
+            scoreList.innerHTML = '';
+            historyScores.forEach((s, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `第 ${index + 1} 名: ${s}`;
+                scoreList.appendChild(listItem);
+            });
+        }
+
+        // 点击等级重新开始游戏
+        levelModalContent.addEventListener('click', function () {
+            levelModal.style.display = "none";
+            // 重置游戏状态
+            isGameOver = false;
+            score = 0;
+            speed = 5;
+            scoreElement.textContent = `积分: 0`;
+            result.textContent = '';
+            playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
+            // 移除所有障碍物
+            const obstacles = track.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => track.removeChild(obstacle));
+            // 移除所有侧边方块
+            const sideBlocks = document.querySelectorAll('.side-block');
+            sideBlocks.forEach(block => block.parentNode.removeChild(block));
+            // 重新启动游戏
+            obstacleGenerationIntervalId = setInterval(generateObstacle, 1500);
+            speedIncreaseTimerId = setInterval(function () {
+                if (!isGameOver) {
+                    speed += speedIncreaseAmount;
+                }
+            }, speedIncreaseInterval);
+            startSideBlocks();
+            backgroundMusic.play();
+        });
+
+        // 撞车时停止游戏和画面
+        window.addEventListener('beforeunload', function () {
+            if (!isGameOver) {
+                gameOver();
+            }
+        });
+
+        // 侧边方块移动相关
+        const sideBlocksLeft = document.getElementById('side-blocks-left');
+        const sideBlocksRight = document.getElementById('side-blocks-right');
+        let sideBlockInterval;
+
+        function startSideBlocks() {
+            // 初始化侧边方块
+            for (let i = 0; i < 60; i++) {
+                const blockLeft = document.createElement('div');
+                blockLeft.classList.add('side-block');
+                blockLeft.style.top = i * 10 + 'px';
+                sideBlocksLeft.appendChild(blockLeft);
+
+                const blockRight = document.createElement('div');
+                blockRight.classList.add('side-block');
+                blockRight.style.top = i * 10 + 'px';
+                sideBlocksRight.appendChild(blockRight);
+            }
+
+            // 移动侧边方块
+            sideBlockInterval = setInterval(function () {
+                if (isGameOver) {
+                    clearInterval(sideBlockInterval);
+                    return;
+                }
+                const blocksLeft = sideBlocksLeft.querySelectorAll('.side-block');
+                const blocksRight = sideBlocksRight.querySelectorAll('.side-block');
+
+                blocksLeft.forEach(block => {
+                    const currentTop = parseInt(block.style.top);
+                    if (currentTop > 600) {
+                        block.style.top = '-10px';
+                    } else {
+                        block.style.top = (currentTop + speed) + 'px';
+                    }
+                });
+
+                blocksRight.forEach(block => {
+                    const currentTop = parseInt(block.style.top);
+                    if (currentTop > 600) {
+                        block.style.top = '-10px';
+                    } else {
+                        block.style.top = (currentTop + speed) + 'px';
+                    }
+                });
+            }, 20);
+        }
+    </script>
+</body>
+
+</html>
