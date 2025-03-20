@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>赛车游戏</title>
     <style>
         body {
@@ -11,6 +11,7 @@
             text-align: center;
             margin: 0;
             padding: 0;
+            overflow: hidden; /* 禁止屏幕上下滑动 */
         }
 
         #game-container {
@@ -35,7 +36,7 @@
         }
 
         #track {
-            width: 500px;
+            width: calc(100% - 60px); /* 考虑侧边方块的宽度 */
             height: 600px;
             border: 1px solid #000;
             position: relative;
@@ -43,7 +44,7 @@
         }
 
         .lane {
-            width: 125px; /* 四个车道，每个车道宽度调整为 125px */
+            width: 25%; /* 四个车道，每个车道宽度为 25% */
             height: 100%;
             float: left;
             border-right: 1px dashed #ccc;
@@ -170,7 +171,7 @@
             <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在四条跑道上行驶。</p> <!-- 修改说明文字 -->
             <p>玩法说明：</p>
             <ul>
-                <li>请鑫哥、博哥老司机评鉴</li>
+                <li>请鑫哥、博哥老司机评鉴！</li>
                 <li>在手机浏览器中，通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
                 <li>在电脑网页中，使用左右方向键控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物（矩形和三角形），成功避开障碍物可获得积分。</li>
@@ -230,7 +231,7 @@
         const playerCar = document.getElementById('player-car');
         const result = document.getElementById('result');
         const scoreElement = document.getElementById('score');
-        const laneWidth = 125; // 四个车道，每个车道宽度调整为 125px
+        const laneWidth = track.offsetWidth / 4; // 根据屏幕宽度计算车道宽度
         let currentLane = 1; // 初始位于中间车道（四个车道的中间是第 2 个车道，索引为 1）
         let isGameOver = false;
         let score = 0;
