@@ -43,7 +43,7 @@
         }
 
         .lane {
-            width: 100px;
+            width: 125px; /* 四个车道，每个车道宽度调整为 125px */
             height: 100%;
             float: left;
             border-right: 1px dashed #ccc;
@@ -167,10 +167,10 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>游戏提示和玩法说明</h2>
-            <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在五条跑道上行驶。</p>
+            <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在四条跑道上行驶。</p> <!-- 修改说明文字 -->
             <p>玩法说明：</p>
             <ul>
-                <li>请鑫哥、博哥老司机评鉴。</li>
+                <li>请鑫哥、博哥老司机评鉴</li>
                 <li>在手机浏览器中，通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
                 <li>在电脑网页中，使用左右方向键控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物（矩形和三角形），成功避开障碍物可获得积分。</li>
@@ -189,8 +189,7 @@
             <div class="lane"></div>
             <div class="lane"></div>
             <div class="lane"></div>
-            <div class="lane"></div>
-            <div class="lane"></div>
+            <div class="lane"></div> <!-- 只保留四个车道 -->
             <div id="player-car" class="car"></div>
         </div>
         <div id="side-blocks-right"></div>
@@ -231,8 +230,8 @@
         const playerCar = document.getElementById('player-car');
         const result = document.getElementById('result');
         const scoreElement = document.getElementById('score');
-        const laneWidth = 100;
-        let currentLane = 2; // 初始位于中间车道
+        const laneWidth = 125; // 四个车道，每个车道宽度调整为 125px
+        let currentLane = 1; // 初始位于中间车道（四个车道的中间是第 2 个车道，索引为 1）
         let isGameOver = false;
         let score = 0;
         let speed = 5;
@@ -309,7 +308,7 @@
                 document.addEventListener('touchend', function (event) {
                     if (isGameOver) return;
                     const endX = event.changedTouches[0].clientX;
-                    if (endX > startX && currentLane < 4) {
+                    if (endX > startX && currentLane < 3) { // 四个车道，最大索引为 3
                         // 向右滑动
                         moveCar(1);
                     } else if (endX < startX && currentLane > 0) {
@@ -335,7 +334,7 @@
 
         // 移动赛车函数
         function moveCar(direction) {
-            if ((direction === -1 && currentLane > 0) || (direction === 1 && currentLane < 4)) {
+            if ((direction === -1 && currentLane > 0) || (direction === 1 && currentLane < 3)) { // 四个车道，最大索引为 3
                 // 播放移动音效
                 moveSound.currentTime = 0;
                 try {
@@ -370,7 +369,7 @@
             for (let i = 0; i < numObstacles; i++) {
                 let randomLane;
                 do {
-                    randomLane = Math.floor(Math.random() * 5);
+                    randomLane = Math.floor(Math.random() * 4); // 四个车道，随机索引范围为 0 - 3
                 } while (usedLanes.includes(randomLane));
                 usedLanes.push(randomLane);
 
