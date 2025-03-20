@@ -144,6 +144,30 @@
             right: 20px;
             text-align: left;
         }
+
+        /* 触摸控制按钮样式 */
+        #touch-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 0 20px;
+        }
+
+        .touch-button {
+            width: 100px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -156,7 +180,7 @@
             <p>欢迎来到赛车游戏！在这个游戏中，你将控制一辆赛车在五条跑道上行驶。</p>
             <p>玩法说明：</p>
             <ul>
-                <li>使用左右方向键控制赛车在不同跑道之间移动。</li>
+                <li>使用左右方向键或者触摸屏幕控制按钮控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物，成功避开障碍物可获得积分。</li>
                 <li>距离障碍物越近时成功转向，获得的积分越高。</li>
                 <li>随着游戏时间的推移，障碍物的移动速度会越来越快。</li>
@@ -178,7 +202,7 @@
         </div>
         <div id="side-blocks-right"></div>
     </div>
-    <p>使用左右方向键控制赛车移动</p>
+    <p>使用左右方向键或者触摸屏幕控制按钮控制赛车移动</p>
     <div id="result"></div>
     <div id="score">积分: 0</div>
 
@@ -193,6 +217,12 @@
     <div id="history-scores">
         <h3>历史积分</h3>
         <ul id="score-list"></ul>
+    </div>
+
+    <!-- 触摸控制按钮 -->
+    <div id="touch-controls">
+        <div id="left-button" class="touch-button">←</div>
+        <div id="right-button" class="touch-button">→</div>
     </div>
 
     <!-- 音效元素 -->
@@ -237,6 +267,10 @@
         const scoreList = document.getElementById('score-list');
         let historyScores = [];
 
+        // 获取触摸控制按钮
+        const leftButton = document.getElementById('left-button');
+        const rightButton = document.getElementById('right-button');
+
         // 打开模态框
         window.onload = function () {
             modal.style.display = "block";
@@ -250,8 +284,14 @@
         // 点击开始游戏按钮关闭模态框并开始游戏
         startGameButton.onclick = function () {
             modal.style.display = "none";
-            // 开始播放背景音乐
-            backgroundMusic.play();
+            // 尝试播放背景音乐
+            backgroundMusic.play().catch(() => {
+                // 处理自动播放失败的情况
+                document.addEventListener('touchstart', function playMusic() {
+                    backgroundMusic.play();
+                    document.removeEventListener('touchstart', playMusic);
+                });
+            });
             // 启动定时生成障碍物
             obstacleGenerationIntervalId = setInterval(generateObstacle, 1500);
             // 启动定时增加速度
@@ -291,6 +331,53 @@
                 currentLane--;
                 playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             } else if (event.key === 'ArrowRight' && currentLane < 4) {
+                currentLane++;
+                playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
+            }
+        });
+
+        // 监听触摸控制按钮事件
+        leftButton.addEventListener('touchstart', function () {
+            if (isGameOver) return;
+            if (currentLane > 0) {
+                // 播放移动音效
+                moveSound.currentTime = 0;
+                moveSound.play();
+                // 检查是否成功转向避开障碍物
+                const obstacles = track.querySelectorAll('.obstacle');
+                const playerRect = playerCar.getBoundingClientRect();
+                obstacles.forEach(obstacle => {
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    const distance = Math.abs(obstacleRect.top - playerRect.bottom);
+                    if (distance < 200) { // 只考虑距离较近的障碍物
+                        const turnScore = Math.min(100, Math.max(50, 100 - Math.floor(distance / 2)));
+                        score += turnScore;
+                        scoreElement.textContent = `积分: ${score}`;
+                    }
+                });
+                currentLane--;
+                playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
+            }
+        });
+
+        rightButton.addEventListener('touchstart', function () {
+            if (isGameOver) return;
+            if (currentLane < 4) {
+                // 播放移动音效
+                moveSound.currentTime = 0;
+                moveSound.play();
+                // 检查是否成功转向避开障碍物
+                const obstacles = track.querySelectorAll('.obstacle');
+                const playerRect = playerCar.getBoundingClientRect();
+                obstacles.forEach(obstacle => {
+                    const obstacleRect = obstacle.getBoundingClientRect();
+                    const distance = Math.abs(obstacleRect.top - playerRect.bottom);
+                    if (distance < 200) { // 只考虑距离较近的障碍物
+                        const turnScore = Math.min(100, Math.max(50, 100 - Math.floor(distance / 2)));
+                        score += turnScore;
+                        scoreElement.textContent = `积分: ${score}`;
+                    }
+                });
                 currentLane++;
                 playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             }
@@ -429,7 +516,13 @@
                 }
             }, speedIncreaseInterval);
             startSideBlocks();
-            backgroundMusic.play();
+            backgroundMusic.play().catch(() => {
+                // 处理自动播放失败的情况
+                document.addEventListener('touchstart', function playMusic() {
+                    backgroundMusic.play();
+                    document.removeEventListener('touchstart', playMusic);
+                });
+            });
         });
 
         // 撞车时停止游戏和画面
@@ -489,4 +582,4 @@
     </script>
 </body>
 
-</html>
+</html>    
