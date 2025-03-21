@@ -11,7 +11,7 @@
             text-align: center;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* 禁止屏幕上下滑动 */
+            overflow: hidden;
         }
 
         #game-container {
@@ -36,7 +36,7 @@
         }
 
         #track {
-            width: calc(100% - 60px); /* 考虑侧边方块的宽度 */
+            width: calc(100% - 60px);
             height: 600px;
             border: 1px solid #000;
             position: relative;
@@ -44,7 +44,7 @@
         }
 
         .lane {
-            width: 25%; /* 四个车道，每个车道宽度为 25% */
+            width: 25%;
             height: 100%;
             float: left;
             border-right: 1px dashed #ccc;
@@ -72,7 +72,6 @@
             transform: perspective(500px) rotateX(20deg);
         }
 
-        /* 修改后的小等边三角形障碍物样式 */
         .triangle-obstacle {
             width: 0;
             height: 0;
@@ -94,7 +93,6 @@
             margin-top: 10px;
         }
 
-        /* 模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -146,16 +144,14 @@
             margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%; /* 修改为和游戏提示玩法一样宽 */
+            width: 80%;
             cursor: pointer;
         }
 
-        /* 隐藏触摸控制按钮 */
         #touch-controls {
             display: none;
         }
 
-        /* 游戏进行时隐藏历史积分排名 */
         #history-scores {
             display: none;
         }
@@ -163,15 +159,13 @@
 </head>
 
 <body>
-    <!-- 模态框 -->
     <div id="myModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>游戏提示和玩法说明</h2>
-            <p>欢迎来到老司机竞速！在这个游戏中，你将控制一辆赛车在四条跑道上行驶。</p> <!-- 修改说明文字 -->
+            <p>欢迎来到老司机竞速游戏！在这个游戏中，你将控制一辆赛车在四条跑道上行驶。</p>
             <p>玩法说明：</p>
             <ul>
-                <li>请鑫哥、博哥老司机评鉴！</li>
                 <li>在手机浏览器中，通过左右滑动屏幕控制赛车在不同跑道之间移动。</li>
                 <li>在电脑网页中，使用左右方向键控制赛车在不同跑道之间移动。</li>
                 <li>避开从上方落下的障碍物（矩形和三角形），成功避开障碍物可获得积分。</li>
@@ -182,45 +176,33 @@
         </div>
     </div>
 
-    <!-- <h1>老司机竞速</h1> -->
     <div id="game-container">
         <div id="side-blocks-left"></div>
         <div id="track">
             <div class="lane"></div>
             <div class="lane"></div>
             <div class="lane"></div>
-            <div class="lane"></div> <!-- 只保留四个车道 -->
+            <div class="lane"></div>
             <div id="player-car" class="car"></div>
         </div>
         <div id="side-blocks-right"></div>
     </div>
-    <!-- 删除操作说明文字 -->
-    <!-- <p>在手机浏览器中，通过左右滑动屏幕控制赛车移动；在电脑网页中，使用左右方向键控制赛车移动</p> -->
+
     <div id="result"></div>
     <div id="score">积分: 0</div>
 
-    <!-- 等级模态框 -->
     <div id="level-modal">
         <div id="level-modal-content">
             <p id="level-text"></p>
-            <!-- 游戏结束后显示历史积分排名 -->
             <ul id="score-list"></ul>
         </div>
     </div>
 
-    <!-- 历史积分显示 -->
     <div id="history-scores">
         <h3>历史积分</h3>
         <ul id="score-list"></ul>
     </div>
 
-    <!-- 移除触摸控制按钮 -->
-    <!-- <div id="touch-controls">
-        <div id="left-button" class="touch-button">←</div>
-        <div id="right-button" class="touch-button">→</div>
-    </div> -->
-
-    <!-- 音效元素 -->
     <audio id="moveSound" src="sounds/move.mp3" preload="auto"></audio>
     <audio id="collisionSound" src="sounds/collision.mp3" preload="auto"></audio>
     <audio id="backgroundMusic" src="sounds/background.mp3" preload="auto" loop></audio>
@@ -230,77 +212,62 @@
         const playerCar = document.getElementById('player-car');
         const result = document.getElementById('result');
         const scoreElement = document.getElementById('score');
-        const laneWidth = track.offsetWidth / 4; // 根据屏幕宽度计算车道宽度
-        let currentLane = 1; // 初始位于中间车道（四个车道的中间是第 2 个车道，索引为 1）
+        const laneWidth = track.offsetWidth / 4;
+        let currentLane = 1;
         let isGameOver = false;
         let score = 0;
         let speed = 5;
-        let speedIncreaseInterval = 10000; // 每 10 秒增加一次速度
+        let speedIncreaseInterval = 10000;
         let speedIncreaseAmount = 1;
         let obstacleGenerationIntervalId;
         let speedIncreaseTimerId;
 
-        // 获取音效元素
         const moveSound = document.getElementById('moveSound');
         const collisionSound = document.getElementById('collisionSound');
         const backgroundMusic = document.getElementById('backgroundMusic');
 
-        // 设置背景音乐音量
         backgroundMusic.volume = 0.3;
 
-        // 获取模态框和按钮元素
         const modal = document.getElementById('myModal');
         const closeBtn = document.getElementsByClassName('close')[0];
         const startGameButton = document.getElementById('startGameButton');
 
-        // 等级模态框
         const levelModal = document.getElementById('level-modal');
         const levelText = document.getElementById('level-text');
         const levelModalContent = document.getElementById('level-modal-content');
 
-        // 历史积分列表
         const scoreList = document.getElementById('score-list');
         let historyScores = [];
 
         let startX;
 
-        // 打开模态框
         window.onload = function () {
             modal.style.display = "block";
         }
 
-        // 点击关闭按钮关闭模态框
         closeBtn.onclick = function () {
             modal.style.display = "none";
         }
 
-        // 点击开始游戏按钮关闭模态框并开始游戏
         startGameButton.onclick = function () {
             modal.style.display = "none";
-            // 尝试播放背景音乐
             backgroundMusic.play().catch(() => {
-                // 处理自动播放失败的情况
                 document.addEventListener('touchstart', function playMusic() {
                     backgroundMusic.play();
                     document.removeEventListener('touchstart', playMusic);
                 });
             });
-            // 启动定时生成障碍物
             obstacleGenerationIntervalId = setInterval(generateObstacle, 1500);
-            // 启动定时增加速度
             speedIncreaseTimerId = setInterval(function () {
                 if (!isGameOver) {
                     speed += speedIncreaseAmount;
                 }
             }, speedIncreaseInterval);
-            // 启动侧边方块移动
             startSideBlocks();
 
-            // 判断是否为移动设备
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
             if (isMobile) {
-                // 移动设备添加滑动屏幕事件监听器
                 document.addEventListener('touchstart', function (event) {
                     startX = event.touches[0].clientX;
                 });
@@ -308,16 +275,13 @@
                 document.addEventListener('touchend', function (event) {
                     if (isGameOver) return;
                     const endX = event.changedTouches[0].clientX;
-                    if (endX > startX && currentLane < 3) { // 四个车道，最大索引为 3
-                        // 向右滑动
+                    if (endX > startX && currentLane < 3) {
                         moveCar(1);
                     } else if (endX < startX && currentLane > 0) {
-                        // 向左滑动
                         moveCar(-1);
                     }
                 });
             } else {
-                // 电脑设备添加按键事件监听
                 document.addEventListener('keydown', function (event) {
                     if (isGameOver) return;
                     if (event.key === 'ArrowLeft') {
@@ -329,52 +293,35 @@
             }
         }
 
-        // 设置赛车初始位置
         playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
 
-        // 移动赛车函数
         function moveCar(direction) {
-            if ((direction === -1 && currentLane > 0) || (direction === 1 && currentLane < 3)) { // 四个车道，最大索引为 3
-                // 播放移动音效
+            if ((direction === -1 && currentLane > 0) || (direction === 1 && currentLane < 3)) {
                 moveSound.currentTime = 0;
                 try {
                     moveSound.play();
                 } catch (error) {
                     console.error('移动音效播放失败:', error);
                 }
-                // 检查是否成功转向避开障碍物
-                const obstacles = track.querySelectorAll('.obstacle, .triangle-obstacle');
-                const playerRect = playerCar.getBoundingClientRect();
-                obstacles.forEach(obstacle => {
-                    const obstacleRect = obstacle.getBoundingClientRect();
-                    const distance = Math.abs(obstacleRect.top - playerRect.bottom);
-                    if (distance < 200) { // 只考虑距离较近的障碍物
-                        const turnScore = Math.min(100, Math.max(50, 100 - Math.floor(distance / 2)));
-                        score += turnScore;
-                        scoreElement.textContent = `积分: ${score}`;
-                    }
-                });
                 currentLane += direction;
                 playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
             }
         }
 
-        // 生成障碍物
         let obstacleIntervals = [];
         function generateObstacle() {
             if (isGameOver) return;
-            const numObstacles = Math.floor(Math.random() * 3) + 1; // 随机生成 1 - 3 个障碍物
+            const numObstacles = Math.floor(Math.random() * 3) + 1;
             const usedLanes = [];
 
             for (let i = 0; i < numObstacles; i++) {
                 let randomLane;
                 do {
-                    randomLane = Math.floor(Math.random() * 4); // 四个车道，随机索引范围为 0 - 3
+                    randomLane = Math.floor(Math.random() * 4);
                 } while (usedLanes.includes(randomLane));
                 usedLanes.push(randomLane);
 
-                // 随机决定是矩形还是三角形障碍物
-                const isTriangle = Math.random() < 0.3; // 30% 的概率是三角形障碍物
+                const isTriangle = Math.random() < 0.3;
                 let obstacle;
                 if (isTriangle) {
                     obstacle = document.createElement('div');
@@ -384,7 +331,7 @@
                     obstacle.classList.add('obstacle');
                 }
                 obstacle.style.left = (randomLane * laneWidth + (laneWidth - 40) / 2) + 'px';
-                obstacle.style.top = '-35px'; // 调整三角形初始位置
+                obstacle.style.top = '-35px';
                 track.appendChild(obstacle);
 
                 const moveInterval = setInterval(function () {
@@ -399,11 +346,32 @@
                     if (currentTop > 600) {
                         clearInterval(moveInterval);
                         track.removeChild(obstacle);
+                        // 障碍物移出屏幕时检查是否躲避成功并加分
+                        const obstacleLane = Math.floor((parseInt(obstacle.style.left) - (laneWidth - 40) / 2) / laneWidth);
+                        if (obstacleLane!== currentLane) {
+                            score += 50;
+                            scoreElement.textContent = `积分: ${score}`;
+                        } else {
+                            const currentLaneObstacles = Array.from(track.querySelectorAll('.obstacle, .triangle-obstacle')).filter(o => {
+                                const oLane = Math.floor((parseInt(o.style.left) - (laneWidth - 40) / 2) / laneWidth);
+                                return oLane === currentLane;
+                            });
+                            if (currentLaneObstacles.length > 0) {
+                                const closestObstacle = currentLaneObstacles.reduce((prev, curr) => {
+                                    const prevTop = parseInt(prev.style.top);
+                                    const currTop = parseInt(curr.style.top);
+                                    return Math.abs(prevTop - playerTop) < Math.abs(currTop - playerTop)? prev : curr;
+                                });
+                                const closestDistance = Math.abs(parseInt(closestObstacle.style.top) - playerTop);
+                                const extraScore = Math.min(100, Math.max(50, 100 - Math.floor(closestDistance / 2)));
+                                score += extraScore;
+                                scoreElement.textContent = `积分: ${score}`;
+                            }
+                        }
                     } else {
                         obstacle.style.top = (currentTop + speed) + 'px';
                         if (checkCollision(playerCar, obstacle)) {
                             clearInterval(moveInterval);
-                            // 播放碰撞音效
                             collisionSound.currentTime = 0;
                             try {
                                 collisionSound.play();
@@ -418,7 +386,6 @@
             }
         }
 
-        // 检查碰撞
         function checkCollision(car1, car2) {
             const rect1 = car1.getBoundingClientRect();
             const rect2 = car2.getBoundingClientRect();
@@ -430,32 +397,22 @@
             );
         }
 
-        // 游戏结束
         function gameOver() {
             isGameOver = true;
             result.textContent = `游戏结束！最终得分: ${score}`;
-            // 停止所有障碍物移动的定时器
             obstacleIntervals.forEach(interval => clearInterval(interval));
-            // 停止定时生成障碍物
             clearInterval(obstacleGenerationIntervalId);
-            // 停止定时增加速度
             clearInterval(speedIncreaseTimerId);
-            // 停止背景音乐
             backgroundMusic.pause();
-            // 停止侧边方块移动
             clearInterval(sideBlockInterval);
 
-            // 记录历史积分
             historyScores.push(score);
-            // 对历史积分进行排序
             historyScores.sort((a, b) => b - a);
-            // 只保留前 10 个积分
             if (historyScores.length > 10) {
                 historyScores = historyScores.slice(0, 10);
             }
             updateScoreList();
 
-            // 根据分数显示等级
             let level;
             if (score < 2000) {
                 level = "马路杀手";
@@ -470,7 +427,6 @@
             levelModal.style.display = "block";
         }
 
-        // 更新历史积分列表
         function updateScoreList() {
             scoreList.innerHTML = '';
             historyScores.forEach((s, index) => {
@@ -480,23 +436,18 @@
             });
         }
 
-        // 点击等级重新开始游戏
         levelModalContent.addEventListener('click', function () {
             levelModal.style.display = "none";
-            // 重置游戏状态
             isGameOver = false;
             score = 0;
             speed = 5;
             scoreElement.textContent = `积分: 0`;
             result.textContent = '';
             playerCar.style.left = (currentLane * laneWidth + (laneWidth - 40) / 2) + 'px';
-            // 移除所有障碍物
             const obstacles = track.querySelectorAll('.obstacle, .triangle-obstacle');
             obstacles.forEach(obstacle => track.removeChild(obstacle));
-            // 移除所有侧边方块
             const sideBlocks = document.querySelectorAll('.side-block');
             sideBlocks.forEach(block => block.parentNode.removeChild(block));
-            // 重新启动游戏
             obstacleGenerationIntervalId = setInterval(generateObstacle, 1500);
             speedIncreaseTimerId = setInterval(function () {
                 if (!isGameOver) {
@@ -505,7 +456,6 @@
             }, speedIncreaseInterval);
             startSideBlocks();
             backgroundMusic.play().catch(() => {
-                // 处理自动播放失败的情况
                 document.addEventListener('touchstart', function playMusic() {
                     backgroundMusic.play();
                     document.removeEventListener('touchstart', playMusic);
@@ -513,20 +463,17 @@
             });
         });
 
-        // 撞车时停止游戏和画面
         window.addEventListener('beforeunload', function () {
             if (!isGameOver) {
                 gameOver();
             }
         });
 
-        // 侧边方块移动相关
         const sideBlocksLeft = document.getElementById('side-blocks-left');
         const sideBlocksRight = document.getElementById('side-blocks-right');
         let sideBlockInterval;
 
         function startSideBlocks() {
-            // 初始化侧边方块
             for (let i = 0; i < 60; i++) {
                 const blockLeft = document.createElement('div');
                 blockLeft.classList.add('side-block');
@@ -539,7 +486,6 @@
                 sideBlocksRight.appendChild(blockRight);
             }
 
-            // 移动侧边方块
             sideBlockInterval = setInterval(function () {
                 if (isGameOver) {
                     clearInterval(sideBlockInterval);
